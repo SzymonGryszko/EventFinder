@@ -30,6 +30,8 @@ public class Event {
     @NotBlank(message = "Description cannot be empty")
     @Lob
     private String description;
+    private String city;
+    private String address;
     @OneToOne
     private User organizer;
     @ManyToMany
