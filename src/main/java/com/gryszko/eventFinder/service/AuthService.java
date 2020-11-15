@@ -1,5 +1,7 @@
 package com.gryszko.eventFinder.service;
 
+import com.gryszko.eventFinder.dto.AuthenticationResponse;
+import com.gryszko.eventFinder.dto.LoginRequest;
 import com.gryszko.eventFinder.dto.RegisterRequest;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.model.NotificationEmail;
@@ -8,10 +10,15 @@ import com.gryszko.eventFinder.model.VerificationToken;
 import com.gryszko.eventFinder.repository.UserRepository;
 
 import com.gryszko.eventFinder.repository.VerificationTokenRepository;
+import com.gryszko.eventFinder.security.JwtProvider;
 import com.gryszko.eventFinder.security.UserRole;
 import com.gryszko.eventFinder.validators.PasswordValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +36,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) throws EntityAlreadyExistsException, PasswordValidationException, EmailException {
@@ -82,5 +91,14 @@ public class AuthService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found " + username));
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public AuthenticationResponse login(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequest.getUsername(), loginRequest.getPassword()
+        ));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = jwtProvider.generateToken(authentication);
+        return new AuthenticationResponse(token, loginRequest.getUsername());
     }
 }

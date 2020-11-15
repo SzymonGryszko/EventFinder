@@ -1,12 +1,13 @@
 package com.gryszko.eventFinder.controllers;
 
+import com.gryszko.eventFinder.dto.AuthenticationResponse;
+import com.gryszko.eventFinder.dto.LoginRequest;
 import com.gryszko.eventFinder.dto.RegisterRequest;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,6 +30,11 @@ public class AuthController {
         authService.verifyAccount(token);
         return new ResponseEntity<>("Account activated successfully", HttpStatus.OK);
 
+    }
+
+    @PostMapping("/login")
+    public AuthenticationResponse login(@RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
     }
 
 }
