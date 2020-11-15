@@ -10,7 +10,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 import static javax.persistence.FetchType.LAZY;
@@ -33,9 +32,9 @@ public class User {
     @NotBlank(message = "Email is required")
     private String email;
     private Instant created;
-    private boolean idEnabled;
+    private boolean isEnabled;
     private UserRole userRole;
-    @ManyToMany
+    @ManyToMany(fetch = LAZY)
     private Set<Event> events;
 
 }
