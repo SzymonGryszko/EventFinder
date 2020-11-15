@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 import static io.jsonwebtoken.Jwts.parser;
 
 @AllArgsConstructor
@@ -22,6 +25,9 @@ public class JwtProvider {
         User principal = (User) authentication.getPrincipal();
         return Jwts.builder()
                 .setSubject(principal.getUsername())
+                .claim("authorities", principal.getAuthorities())
+                .setIssuedAt(new Date())
+                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(jwtConfig.getTokenExpirationAfterDays())))
                 .signWith(secretKey)
                 .compact();
     }
