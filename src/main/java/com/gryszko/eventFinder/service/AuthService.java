@@ -1,9 +1,7 @@
 package com.gryszko.eventFinder.service;
 
 import com.gryszko.eventFinder.dto.RegisterRequest;
-import com.gryszko.eventFinder.exception.EmailException;
-import com.gryszko.eventFinder.exception.EntityAlreadyExistsException;
-import com.gryszko.eventFinder.exception.PasswordValidationException;
+import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.model.NotificationEmail;
 import com.gryszko.eventFinder.model.User;
 import com.gryszko.eventFinder.model.VerificationToken;
@@ -14,6 +12,7 @@ import com.gryszko.eventFinder.security.UserRole;
 import com.gryszko.eventFinder.validators.PasswordValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +57,7 @@ public class AuthService {
 
         mailService.sendMail(new NotificationEmail("Please activate your account",
                 user.getEmail(), "Please click the link below to activate your account + " +
-                "http://localhost:8080/api/auth.accountVerification/" + token));
+                "http://localhost:8080/api/auth/accountVerification/" + token));
     }
 
     private String generateVerificationToken(User user) {
@@ -69,5 +68,19 @@ public class AuthService {
 
         verificationTokenRepository.save(verificationToken);
         return token;
+    }
+
+    public void verifyAccount(String token) throws TokenException, NotFoundException {
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+        verificationToken.orElseThrow(() -> new TokenException("Invalid Token"));
+        fetchUserAndEnable(verificationToken.get());
+    }
+
+    @Transactional
+    public void fetchUserAndEnable(VerificationToken verificationToken) throws NotFoundException {
+        String username = verificationToken.getUser().getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found " + username));
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 }

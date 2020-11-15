@@ -1,4 +1,4 @@
-package com.gryszko.eventFinder.exception;
+package com.gryszko.eventFinder.error;
 
 import java.time.LocalDateTime;
 

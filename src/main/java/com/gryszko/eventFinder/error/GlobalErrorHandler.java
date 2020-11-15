@@ -1,5 +1,6 @@
-package com.gryszko.eventFinder.exception;
+package com.gryszko.eventFinder.error;
 
+import com.gryszko.eventFinder.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -28,8 +29,20 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = EmailException.class)
-    public ResponseEntity<Object> handleEmail(EmailException e) {
+    public ResponseEntity<Object> handleEmailException(EmailException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorDto(e.getMessage()));
+    }
+
+    @ExceptionHandler(value = TokenException.class)
+    public ResponseEntity<Object> handleTokenException(TokenException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorDto(e.getMessage()));
+    }
+
+    @ExceptionHandler(value = NotFoundException.class)
+    public ResponseEntity<Object> handleNotFoundException(NotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorDto(e.getMessage()));
     }
 

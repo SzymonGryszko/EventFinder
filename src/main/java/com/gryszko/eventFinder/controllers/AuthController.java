@@ -1,18 +1,13 @@
 package com.gryszko.eventFinder.controllers;
 
 import com.gryszko.eventFinder.dto.RegisterRequest;
-import com.gryszko.eventFinder.exception.EmailException;
-import com.gryszko.eventFinder.exception.EntityAlreadyExistsException;
-import com.gryszko.eventFinder.exception.PasswordValidationException;
+import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -27,6 +22,13 @@ public class AuthController {
     public ResponseEntity<String> signup(@Valid @RequestBody RegisterRequest registerRequest) throws EmailException, PasswordValidationException, EntityAlreadyExistsException {
         authService.signup(registerRequest);
         return new ResponseEntity<>("User Registration successful", HttpStatus.OK);
+    }
+
+    @GetMapping("/accountVerification/{token}")
+    public ResponseEntity<String> verifyAccount(@PathVariable String token) throws TokenException, NotFoundException {
+        authService.verifyAccount(token);
+        return new ResponseEntity<>("Account activated successfully", HttpStatus.OK);
+
     }
 
 }
