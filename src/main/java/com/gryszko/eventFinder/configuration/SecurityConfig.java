@@ -2,6 +2,7 @@ package com.gryszko.eventFinder.configuration;
 
 import com.gryszko.eventFinder.security.JwtAuthenticationFilter;
 import com.gryszko.eventFinder.security.JwtConfig;
+import com.gryszko.eventFinder.security.UserRole;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,14 +31,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().addFilterBefore(jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class)
+        http.csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
                 .authorizeRequests()
-                .antMatchers("/api/auth/**")
-                .permitAll()
+                .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
+                .antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/api/event").hasRole(UserRole.USER.toString())
                 .anyRequest()
                 .authenticated();
+
+        http.addFilterBefore(jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class);
 
     }
 }
