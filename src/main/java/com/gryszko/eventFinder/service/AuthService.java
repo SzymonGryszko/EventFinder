@@ -2,11 +2,14 @@ package com.gryszko.eventFinder.service;
 
 import com.gryszko.eventFinder.dto.AuthenticationResponse;
 import com.gryszko.eventFinder.dto.LoginRequest;
+import com.gryszko.eventFinder.dto.PasswordResetRequest;
 import com.gryszko.eventFinder.dto.RegisterRequest;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.model.NotificationEmail;
+import com.gryszko.eventFinder.model.PasswordResetToken;
 import com.gryszko.eventFinder.model.User;
 import com.gryszko.eventFinder.model.VerificationToken;
+import com.gryszko.eventFinder.repository.PasswordResetTokenRepository;
 import com.gryszko.eventFinder.repository.UserRepository;
 
 import com.gryszko.eventFinder.repository.VerificationTokenRepository;
@@ -38,6 +41,7 @@ public class AuthService {
     private final MailService mailService;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) throws EntityAlreadyExistsException, PasswordValidationException, EmailException {
@@ -108,5 +112,43 @@ public class AuthService {
         mailService.sendMail(new NotificationEmail("Username reminder for EventFinder",
                 email,
                 "Your username is " + user.getUsername()));
+    }
+
+
+    @Transactional
+    public void sendResetPasswordEmail(String email) throws NotFoundException, EmailException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("No username found for given email"));
+        String passwordResetToken = generatePasswordResetToken(user);
+
+        mailService.sendMail(new NotificationEmail("EventFinder password reset",
+                user.getEmail(), "Please click the link below to reset your password + " +
+                "http://localhost:8080/api/auth/resetPassword/" + passwordResetToken));
+    }
+
+    private String generatePasswordResetToken(User user) {
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken passwordResetToken = new PasswordResetToken();
+        passwordResetToken.setToken(token);
+        passwordResetToken.setUser(user);
+
+        passwordResetTokenRepository.save(passwordResetToken);
+        return token;
+    }
+
+    @Transactional
+    public void resetPassword(PasswordResetRequest passwordResetRequest, String token) throws PasswordValidationException, NotFoundException {
+        if (!passwordResetRequest.getNewPassword().equals(passwordResetRequest.getConfirmationPassword())) {
+            throw new PasswordValidationException("New password is not the same as confirmation password");
+        }
+
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new NotFoundException("Token not found " + token));
+        User user = passwordResetToken.getUser();
+        user.setPassword(passwordEncoder.encode(passwordResetRequest.getNewPassword()));
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(passwordResetToken);
+
     }
 }

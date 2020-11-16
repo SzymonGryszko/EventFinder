@@ -2,6 +2,7 @@ package com.gryszko.eventFinder.controllers;
 
 import com.gryszko.eventFinder.dto.AuthenticationResponse;
 import com.gryszko.eventFinder.dto.LoginRequest;
+import com.gryszko.eventFinder.dto.PasswordResetRequest;
 import com.gryszko.eventFinder.dto.RegisterRequest;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.service.AuthService;
@@ -41,6 +42,20 @@ public class AuthController {
     public ResponseEntity<String> remindUsername(@RequestParam(name = "email", required = true) String email) throws NotFoundException, EmailException {
         authService.remindUsername(email);
         return new ResponseEntity<>("Username reminder email successfully sent", HttpStatus.OK);
+    }
+
+    @GetMapping("/resetPassword")
+    public ResponseEntity<String> sendResetPasswordEmail(@RequestParam(name = "email", required = true) String email) throws NotFoundException, EmailException {
+        authService.sendResetPasswordEmail(email);
+        return new ResponseEntity<>("Password reset email successfully sent", HttpStatus.OK);
+    }
+
+    @PutMapping("/resetPassword/{token}")
+    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest,
+                                                @PathVariable(name = "token", required = true) String token) throws PasswordValidationException, NotFoundException {
+        authService.resetPassword(passwordResetRequest, token);
+        return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
+
     }
 
 }

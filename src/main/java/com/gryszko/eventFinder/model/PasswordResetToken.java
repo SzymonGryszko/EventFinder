@@ -5,18 +5,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-
 import java.time.Instant;
 
-import static javax.persistence.FetchType.*;
+import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "verification_token")
-public class VerificationToken {
+@Table(name = "password_reset_token")
+public class PasswordResetToken {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)

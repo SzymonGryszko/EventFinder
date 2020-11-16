@@ -1,9 +1,6 @@
 package com.gryszko.eventFinder;
 
-import com.gryszko.eventFinder.model.Comment;
-import com.gryszko.eventFinder.model.Event;
-import com.gryszko.eventFinder.model.User;
-import com.gryszko.eventFinder.model.VerificationToken;
+import com.gryszko.eventFinder.model.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -16,7 +13,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 		Comment.class,
 		Event.class,
 		User.class,
-		VerificationToken.class
+		VerificationToken.class,
+		PasswordResetToken.class
 })
 @EnableAsync
 public class EventFinderApplication {
