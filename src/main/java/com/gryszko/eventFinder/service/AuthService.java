@@ -101,4 +101,12 @@ public class AuthService {
         String token = jwtProvider.generateToken(authentication);
         return new AuthenticationResponse(token, loginRequest.getUsername());
     }
+
+    public void remindUsername(String email) throws NotFoundException, EmailException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("No username found for given email"));
+        mailService.sendMail(new NotificationEmail("Username reminder for EventFinder",
+                email,
+                "Your username is " + user.getUsername()));
+    }
 }

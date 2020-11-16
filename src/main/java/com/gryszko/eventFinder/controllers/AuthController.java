@@ -37,4 +37,10 @@ public class AuthController {
         return authService.login(loginRequest);
     }
 
+    @GetMapping("/remindUsername")
+    public ResponseEntity<String> remindUsername(@RequestParam(name = "email", required = true) String email) throws NotFoundException, EmailException {
+        authService.remindUsername(email);
+        return new ResponseEntity<>("Username reminder email successfully sent", HttpStatus.OK);
+    }
+
 }
