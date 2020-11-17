@@ -49,7 +49,7 @@ public class AuthController {
 
     @PutMapping("/resetPassword/{token}")
     public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest,
-                                                @PathVariable(name = "token", required = true) String token) throws PasswordValidationException, NotFoundException {
+                                                @PathVariable(name = "token", required = true) String token) throws PasswordValidationException, NotFoundException, TokenException {
         authService.resetPassword(passwordResetRequest, token);
         return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
 

@@ -3,10 +3,8 @@ package com.gryszko.eventFinder.service;
 import com.gryszko.eventFinder.dto.*;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.model.NotificationEmail;
-import com.gryszko.eventFinder.model.PasswordResetToken;
 import com.gryszko.eventFinder.model.User;
 import com.gryszko.eventFinder.model.VerificationToken;
-import com.gryszko.eventFinder.repository.PasswordResetTokenRepository;
 import com.gryszko.eventFinder.repository.UserRepository;
 
 import com.gryszko.eventFinder.repository.VerificationTokenRepository;
@@ -38,7 +36,6 @@ public class AuthService {
     private final MailService mailService;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final JwtConfig jwtConfig;
     private final RefreshTokenService refreshTokenService;
 
@@ -77,6 +74,7 @@ public class AuthService {
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
         verificationToken.setUser(user);
+        verificationToken.setExpirationDate(Instant.now().plusSeconds(5)); //86400
 
         verificationTokenRepository.save(verificationToken);
         return token;
@@ -85,7 +83,14 @@ public class AuthService {
     public void verifyAccount(String token) throws TokenException, NotFoundException {
         Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
         verificationToken.orElseThrow(() -> new TokenException("Invalid Token"));
-        fetchUserAndEnable(verificationToken.get());
+
+        if (verificationToken.get().getExpirationDate().isAfter(Instant.now())) {
+            fetchUserAndEnable(verificationToken.get());
+            verificationTokenRepository.delete(verificationToken.get());
+        } else {
+            throw new TokenException("Token has expired");
+        }
+
     }
 
     @Transactional
@@ -123,36 +128,36 @@ public class AuthService {
     public void sendResetPasswordEmail(String email) throws NotFoundException, EmailException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No username found for given email"));
-        String passwordResetToken = generatePasswordResetToken(user);
+        String passwordResetToken = generateVerificationToken(user);
 
         mailService.sendMail(new NotificationEmail("EventFinder password reset",
                 user.getEmail(), "Please click the link below to reset your password + " +
                 "http://localhost:8080/api/auth/resetPassword/" + passwordResetToken));
     }
 
-    private String generatePasswordResetToken(User user) {
-        String token = UUID.randomUUID().toString();
-        PasswordResetToken passwordResetToken = new PasswordResetToken();
-        passwordResetToken.setToken(token);
-        passwordResetToken.setUser(user);
-
-        passwordResetTokenRepository.save(passwordResetToken);
-        return token;
-    }
 
     @Transactional
-    public void resetPassword(PasswordResetRequest passwordResetRequest, String token) throws PasswordValidationException, NotFoundException {
+    public void resetPassword(PasswordResetRequest passwordResetRequest, String token) throws PasswordValidationException, NotFoundException, TokenException {
         if (!passwordResetRequest.getNewPassword().equals(passwordResetRequest.getConfirmationPassword())) {
             throw new PasswordValidationException("New password is not the same as confirmation password");
         }
+        if (!PasswordValidator.validate(passwordResetRequest.getNewPassword())) {
+            throw new PasswordValidationException("Password needs to be between 8 and 30 characters," +
+                    " contain at least one digit, at least one lower and uppercase letter, no whitespaces allowed");
+        }
 
-        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token)
+        VerificationToken passwordResetToken = verificationTokenRepository.findByToken(token)
                 .orElseThrow(() -> new NotFoundException("Token not found " + token));
-        User user = passwordResetToken.getUser();
-        user.setPassword(passwordEncoder.encode(passwordResetRequest.getNewPassword()));
-        userRepository.save(user);
 
-        passwordResetTokenRepository.delete(passwordResetToken);
+        if (passwordResetToken.getExpirationDate().isAfter(Instant.now())) {
+            User user = passwordResetToken.getUser();
+            user.setPassword(passwordEncoder.encode(passwordResetRequest.getNewPassword()));
+            userRepository.save(user);
+
+            verificationTokenRepository.delete(passwordResetToken);
+        } else {
+            throw new TokenException("Token has expired");
+        }
 
     }
 

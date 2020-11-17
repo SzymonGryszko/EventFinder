@@ -13,8 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 		Comment.class,
 		Event.class,
 		User.class,
-		VerificationToken.class,
-		PasswordResetToken.class
+		VerificationToken.class
 })
 @EnableAsync
 public class EventFinderApplication {
