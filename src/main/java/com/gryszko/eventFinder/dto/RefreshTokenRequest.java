@@ -1,22 +1,16 @@
 package com.gryszko.eventFinder.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import javax.validation.constraints.NotBlank;
 
-
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@Builder
-public class AuthenticationResponse {
-
-    private String authenticationToken;
+public class RefreshTokenRequest {
+    @NotBlank
     private String refreshToken;
-    private Instant expiresAt;
     private String username;
-
 }

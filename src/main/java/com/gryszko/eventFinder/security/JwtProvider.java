@@ -4,15 +4,16 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Date;
-
-import static io.jsonwebtoken.Jwts.parser;
+import java.util.Set;
 
 @AllArgsConstructor
 @Service
@@ -27,7 +28,7 @@ public class JwtProvider {
                 .setSubject(principal.getUsername())
                 .claim("authorities", principal.getAuthorities())
                 .setIssuedAt(new Date())
-                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(jwtConfig.getTokenExpirationAfterDays())))
+                .setExpiration(Date.from(Instant.now().plusMillis(jwtConfig.getTokenExpirationTime())))
                 .signWith(secretKey)
                 .compact();
     }
@@ -43,4 +44,13 @@ public class JwtProvider {
         return claims.getSubject();
     }
 
+    public String generateTokenWithUsernameAndRole(String username, UserRole userRole) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("authorities", Set.of(new SimpleGrantedAuthority(userRole.toString())))
+                .setIssuedAt(new Date())
+                .setExpiration(Date.from(Instant.now().plusMillis(jwtConfig.getTokenExpirationTime())))
+                .signWith(secretKey)
+                .compact();
+    }
 }

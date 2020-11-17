@@ -1,9 +1,6 @@
 package com.gryszko.eventFinder.controllers;
 
-import com.gryszko.eventFinder.dto.AuthenticationResponse;
-import com.gryszko.eventFinder.dto.LoginRequest;
-import com.gryszko.eventFinder.dto.PasswordResetRequest;
-import com.gryszko.eventFinder.dto.RegisterRequest;
+import com.gryszko.eventFinder.dto.*;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -56,6 +53,17 @@ public class AuthController {
         authService.resetPassword(passwordResetRequest, token);
         return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
 
+    }
+
+    @PostMapping("/refreshToken")
+    public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) throws NotFoundException, TokenException {
+        return authService.refreshToken(refreshTokenRequest);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        authService.logout(refreshTokenRequest);
+        return ResponseEntity.status(HttpStatus.OK).body("Refresh Token Deleted Successfully!!");
     }
 
 }

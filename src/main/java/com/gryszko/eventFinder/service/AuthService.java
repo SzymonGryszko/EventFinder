@@ -1,9 +1,6 @@
 package com.gryszko.eventFinder.service;
 
-import com.gryszko.eventFinder.dto.AuthenticationResponse;
-import com.gryszko.eventFinder.dto.LoginRequest;
-import com.gryszko.eventFinder.dto.PasswordResetRequest;
-import com.gryszko.eventFinder.dto.RegisterRequest;
+import com.gryszko.eventFinder.dto.*;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.model.NotificationEmail;
 import com.gryszko.eventFinder.model.PasswordResetToken;
@@ -13,6 +10,7 @@ import com.gryszko.eventFinder.repository.PasswordResetTokenRepository;
 import com.gryszko.eventFinder.repository.UserRepository;
 
 import com.gryszko.eventFinder.repository.VerificationTokenRepository;
+import com.gryszko.eventFinder.security.JwtConfig;
 import com.gryszko.eventFinder.security.JwtProvider;
 import com.gryszko.eventFinder.security.UserRole;
 import com.gryszko.eventFinder.validators.PasswordValidator;
@@ -22,7 +20,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +39,8 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final JwtConfig jwtConfig;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) throws EntityAlreadyExistsException, PasswordValidationException, EmailException {
@@ -103,7 +102,12 @@ public class AuthService {
         ));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtProvider.generateToken(authentication);
-        return new AuthenticationResponse(token, loginRequest.getUsername());
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(refreshTokenService.generateRefreshToken().getToken())
+                .expiresAt(Instant.now().plusMillis(jwtConfig.getTokenExpirationTime()))
+                .username(loginRequest.getUsername())
+                .build();
     }
 
     public void remindUsername(String email) throws NotFoundException, EmailException {
@@ -150,5 +154,27 @@ public class AuthService {
 
         passwordResetTokenRepository.delete(passwordResetToken);
 
+    }
+
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) throws TokenException, NotFoundException {
+        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+
+        User user = userRepository.findByUsername(refreshTokenRequest.getUsername())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        UserRole userRole = user.getUserRole();
+        String username = user.getUsername();
+        String token = jwtProvider.generateTokenWithUsernameAndRole(username, userRole);
+
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(refreshTokenRequest.getRefreshToken())
+                .expiresAt(Instant.now().plusMillis(jwtConfig.getTokenExpirationTime()))
+                .username(username)
+                .build();
+    }
+
+    public void logout(RefreshTokenRequest refreshTokenRequest) {
+        refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());
     }
 }
