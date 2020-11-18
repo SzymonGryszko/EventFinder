@@ -11,7 +11,7 @@ import com.gryszko.eventFinder.repository.VerificationTokenRepository;
 import com.gryszko.eventFinder.security.JwtConfig;
 import com.gryszko.eventFinder.security.JwtProvider;
 import com.gryszko.eventFinder.security.UserRole;
-import com.gryszko.eventFinder.validators.PasswordValidator;
+import com.gryszko.eventFinder.utils.PasswordValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -181,5 +181,13 @@ public class AuthService {
 
     public void logout(RefreshTokenRequest refreshTokenRequest) {
         refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());
+    }
+
+    @Transactional(readOnly = true)
+    public User getCurrentUser() throws NotFoundException {
+        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User)SecurityContextHolder
+        .getContext().getAuthentication().getPrincipal();
+        return userRepository.findByUsername(principal.getUsername())
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }

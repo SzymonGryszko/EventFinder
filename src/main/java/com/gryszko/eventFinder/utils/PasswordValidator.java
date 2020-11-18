@@ -1,4 +1,4 @@
-package com.gryszko.eventFinder.validators;
+package com.gryszko.eventFinder.utils;
 
 public class PasswordValidator {
     public static boolean validate(String password) {
