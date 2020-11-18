@@ -21,7 +21,6 @@ public class EventController {
     @PostMapping
     public void createEvent(@RequestBody EventRequest eventRequest) {
         eventRequest.save(eventRequest);
-
     }
 
     @GetMapping
@@ -30,8 +29,32 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    public EventResponse getPost(@PathVariable Long id) {
+    public EventResponse getEvent(@PathVariable Long id) {
         return  eventService.getEvent(id);
     }
 
+    @GetMapping("/by-organizer/{username}")
+    public List<EventResponse> getEventsByOrganizer(String username) {
+        return eventService.getEventsByOrganizer(username);
+    }
+
+    @GetMapping("/my-events/{username}")
+    public List<EventResponse> getEventsByAttendee(String username) {
+        return eventService.getEventsByAttendee(username);
+    }
+
+    @PutMapping("/update/{id}")
+    public EventResponse updateEvent(@PathVariable Long id){
+        return eventService.updateEvent(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public EventResponse deleteEvent(@PathVariable Long id) {
+        return  eventService.deleteEvent(id);
+    }
+
+    @PostMapping("/{id}/addAttendee")
+    public Integer addAttendeeToEvent(@PathVariable Long id) {
+        return eventService.addAttendeeToEvent(id);
+    }
 }
