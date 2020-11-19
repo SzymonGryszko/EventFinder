@@ -10,11 +10,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Object> handleGeneraException(Exception e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorDto(e.getMessage()));
-    }
+//    @ExceptionHandler(value = Exception.class)
+//    public ResponseEntity<Object> handleGeneraException(Exception e) {
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .body(new ErrorDto(e.getMessage()));
+//    }
 
     @ExceptionHandler(value = EntityAlreadyExistsException.class)
     public ResponseEntity<Object> handleEntityExists(EntityAlreadyExistsException e) {

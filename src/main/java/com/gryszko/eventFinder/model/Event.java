@@ -9,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 import java.sql.Date;
+import java.time.Instant;
 import java.util.Set;
 
 import static javax.persistence.GenerationType.*;
@@ -32,6 +33,7 @@ public class Event {
     private String description;
     private String city;
     private String address;
+    private Instant createdAt;
     @OneToOne
     private User organizer;
     @ManyToMany

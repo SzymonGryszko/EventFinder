@@ -24,11 +24,11 @@ public class EventController {
         eventService.save(eventRequest);
     }
 
-//    @GetMapping
-//    public List<Event> getAllEvents() {
-//        return eventService.getAllEvents();
-//    }
-//
+    @GetMapping
+    public List<EventResponse> getAllEvents() {
+        return eventService.getAllEvents();
+    }
+
 //    @GetMapping("/{id}")
 //    public EventResponse getEvent(@PathVariable Long id) {
 //        return eventService.getEvent(id);
