@@ -2,6 +2,7 @@ package com.gryszko.eventFinder.controllers;
 
 import com.gryszko.eventFinder.dto.CommentDto;
 import com.gryszko.eventFinder.exception.NotFoundException;
+import com.gryszko.eventFinder.exception.UnauthorizedException;
 import com.gryszko.eventFinder.service.CommentService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public void createComment(@RequestBody CommentDto commentDto) throws NotFoundException {
+    public void createComment(@RequestBody CommentDto commentDto) throws NotFoundException, UnauthorizedException {
         commentService.save(commentDto);
     }
 

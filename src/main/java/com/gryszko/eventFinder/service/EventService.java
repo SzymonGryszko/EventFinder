@@ -33,7 +33,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final MailService mailService;
 
-    public void save(EventRequest eventRequest) throws NotFoundException {
+    public void save(EventRequest eventRequest) throws UnauthorizedException {
         Event eventToBeSaved = eventMapper.mapEventRequestToEntity(eventRequest);
         eventRepository.save(eventToBeSaved);
 
@@ -98,7 +98,7 @@ public class EventService {
 
     }
 
-    public EventResponse updateEvent(Long id, EventRequest eventRequest) throws NotFoundException, EmailException {
+    public EventResponse updateEvent(Long id, EventRequest eventRequest) throws NotFoundException, EmailException, UnauthorizedException {
         Event eventEntity = eventRepository.findById(id).orElseThrow(() -> new NotFoundException("Event not found"));
         Set<User> attendees = eventEntity.getAttendees();
         Event event = eventMapper.mapEventRequestToEntity(eventRequest);

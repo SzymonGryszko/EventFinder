@@ -5,6 +5,7 @@ import com.github.marlonlom.utilities.timeago.TimeAgo;
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
 import com.gryszko.eventFinder.exception.NotFoundException;
+import com.gryszko.eventFinder.exception.UnauthorizedException;
 import com.gryszko.eventFinder.model.Event;
 import com.gryszko.eventFinder.service.AuthService;
 import com.gryszko.eventFinder.utils.EventDateFormatter;
@@ -22,7 +23,7 @@ public class EventMapper {
     private final AuthService authService;
 
 
-    public Event mapEventRequestToEntity(EventRequest eventRequest) throws NotFoundException {
+    public Event mapEventRequestToEntity(EventRequest eventRequest) throws UnauthorizedException {
         return Event.builder()
                 .title(eventRequest.getTitle())
                 .startingDate(eventDateFormatter.formatStringDateToSQLDate(eventRequest.getStartingDate()))

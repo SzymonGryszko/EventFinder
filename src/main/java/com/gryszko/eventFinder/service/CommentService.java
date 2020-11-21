@@ -2,6 +2,7 @@ package com.gryszko.eventFinder.service;
 
 import com.gryszko.eventFinder.dto.CommentDto;
 import com.gryszko.eventFinder.exception.NotFoundException;
+import com.gryszko.eventFinder.exception.UnauthorizedException;
 import com.gryszko.eventFinder.mapper.CommentMapper;
 import com.gryszko.eventFinder.model.Comment;
 import com.gryszko.eventFinder.model.Event;
@@ -27,7 +28,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
 
-    public void save(CommentDto commentDto) throws NotFoundException {
+    public void save(CommentDto commentDto) throws NotFoundException, UnauthorizedException {
         Event event = eventRepository.findById(commentDto.getEventId()).orElseThrow(() -> new NotFoundException("Event not found " + commentDto.getEventId().toString()));
         Comment comment = commentMapper.mapToComment(commentDto, event, authService.getCurrentUser());
         commentRepository.save(comment);

@@ -20,7 +20,7 @@ public class EventController {
     private EventService eventService;
 
     @PostMapping
-    public void createEvent(@RequestBody EventRequest eventRequest) throws NotFoundException {
+    public void createEvent(@RequestBody EventRequest eventRequest) throws UnauthorizedException {
         eventService.save(eventRequest);
     }
 
@@ -51,7 +51,7 @@ public class EventController {
     }
 
     @PutMapping("/update/{id}")
-    public EventResponse updateEvent(@PathVariable Long id, @RequestBody EventRequest eventRequest) throws NotFoundException, EmailException {
+    public EventResponse updateEvent(@PathVariable Long id, @RequestBody EventRequest eventRequest) throws NotFoundException, EmailException, UnauthorizedException {
         return eventService.updateEvent(id, eventRequest);
     }
 

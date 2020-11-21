@@ -36,20 +36,20 @@ public class AuthController {
     }
 
     @GetMapping("/remindUsername")
-    public ResponseEntity<String> remindUsername(@RequestParam(name = "email", required = true) String email) throws NotFoundException, EmailException {
+    public ResponseEntity<String> remindUsername(@RequestParam(name = "email") String email) throws NotFoundException, EmailException {
         authService.remindUsername(email);
         return new ResponseEntity<>("Username reminder email successfully sent", HttpStatus.OK);
     }
 
     @GetMapping("/resetPassword")
-    public ResponseEntity<String> sendResetPasswordEmail(@RequestParam(name = "email", required = true) String email) throws NotFoundException, EmailException {
+    public ResponseEntity<String> sendResetPasswordEmail(@RequestParam(name = "email") String email) throws NotFoundException, EmailException {
         authService.sendResetPasswordEmail(email);
         return new ResponseEntity<>("Password reset email successfully sent", HttpStatus.OK);
     }
 
     @PutMapping("/resetPassword/{token}")
     public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest,
-                                                @PathVariable(name = "token", required = true) String token) throws PasswordValidationException, NotFoundException, ExpiryException {
+                                                @PathVariable(name = "token") String token) throws PasswordValidationException, NotFoundException, ExpiryException {
         authService.resetPassword(passwordResetRequest, token);
         return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
 

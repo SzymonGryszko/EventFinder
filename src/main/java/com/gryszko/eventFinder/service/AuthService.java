@@ -184,10 +184,14 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public User getCurrentUser() throws NotFoundException {
-        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User)SecurityContextHolder
-        .getContext().getAuthentication().getPrincipal();
-        return userRepository.findByUsername(principal.getUsername())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+    public User getCurrentUser() throws UnauthorizedException {
+        try{
+            org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User)SecurityContextHolder
+                    .getContext().getAuthentication().getPrincipal();
+
+            return userRepository.findByUsername(principal.getUsername()).get();
+        } catch (Exception e) {
+            throw new UnauthorizedException("You are not authenticated");
+        }
     }
 }
