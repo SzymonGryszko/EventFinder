@@ -33,7 +33,7 @@ public class Event {
     private String description;
     private String city;
     private String address;
-    private Instant createdAt;
+    private Instant lastUpdated;
     @OneToOne
     private User organizer;
     @ManyToMany

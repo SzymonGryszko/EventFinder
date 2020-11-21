@@ -46,4 +46,10 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
                 .body(new ErrorDto(e.getMessage()));
     }
 
+    @ExceptionHandler(value = UnauthorizedException.class)
+    public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorDto(e.getMessage()));
+    }
+
 }

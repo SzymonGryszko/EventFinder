@@ -2,7 +2,10 @@ package com.gryszko.eventFinder.controllers;
 
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
+import com.gryszko.eventFinder.exception.EmailException;
+import com.gryszko.eventFinder.exception.EntityAlreadyExistsException;
 import com.gryszko.eventFinder.exception.NotFoundException;
+import com.gryszko.eventFinder.exception.UnauthorizedException;
 import com.gryszko.eventFinder.model.Event;
 import com.gryszko.eventFinder.repository.EventRepository;
 import com.gryszko.eventFinder.service.EventService;
@@ -29,21 +32,27 @@ public class EventController {
         return eventService.getAllEvents();
     }
 
-//    @GetMapping("/{id}")
-//    public EventResponse getEvent(@PathVariable Long id) {
-//        return eventService.getEvent(id);
-//    }
-//
-//    @GetMapping("/by-organizer/{username}")
-//    public List<EventResponse> getEventsByOrganizer(String username) {
-//        return eventService.getEventsByOrganizer(username);
-//    }
-//
-//    @GetMapping("/my-events/{username}")
-//    public List<EventResponse> getEventsByAttendee(String username) {
-//        return eventService.getEventsByAttendee(username);
-//    }
-//
+    @GetMapping("/{id}")
+    public EventResponse getEvent(@PathVariable Long id) throws NotFoundException {
+        return eventService.getEvent(id);
+    }
+
+    @GetMapping("/by-organizer/{username}")
+    public List<EventResponse> getEventsByOrganizer(@PathVariable String username) throws NotFoundException, UnauthorizedException {
+        System.out.println(username);
+        return eventService.getEventsByOrganizer(username);
+    }
+
+    @GetMapping("/my-events/{username}")
+    public List<EventResponse> getEventsByAttendee(@PathVariable String username) throws NotFoundException {
+        return eventService.getEventsByAttendee(username);
+    }
+
+    @PostMapping("/eventSignup")
+    public void signupUserForEvent(@RequestParam String username, Long eventId) throws NotFoundException, EmailException, EntityAlreadyExistsException {
+        eventService.signupUserForEvent(username, eventId);
+    }
+
 //    @PutMapping("/update/{id}")
 //    public EventResponse updateEvent(@PathVariable Long id) {
 //        return eventService.updateEvent(id);

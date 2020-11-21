@@ -1,10 +1,13 @@
 package com.gryszko.eventFinder.utils;
 
 
+import org.springframework.stereotype.Component;
+
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+@Component
 public class EventDateFormatter {
 
     public Date formatStringDateToSQLDate(String date) {

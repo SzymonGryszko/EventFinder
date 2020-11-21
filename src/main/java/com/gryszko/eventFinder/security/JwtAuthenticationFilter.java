@@ -45,19 +45,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {
             String username = jwtProvider.getUsernameFromJwt(jwt);
 
-//            Jws<Claims> claimsJws = Jwts.parserBuilder()
-//                    .setSigningKey(secretKey)
-//                    .build()
-//                    .parseClaimsJws(jwt);
-//
-//            Claims body = claimsJws.getBody();
-//
-//            var authorities = (List<Map<String, String>>) body.get("authorities");
-//
-//            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
-//                    .map(m -> new SimpleGrantedAuthority(m.get("authority")))
-//                    .collect(Collectors.toSet());
-
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
                     null, userDetails.getAuthorities());//simpleGrantedAuthorities

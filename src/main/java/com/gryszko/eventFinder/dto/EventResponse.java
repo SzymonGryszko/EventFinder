@@ -21,5 +21,5 @@ public class EventResponse {
     private String address;
     private String organizerName;
     private Integer numberOfAttendees;
-    private String timeAgo;
+    private String lastUpdated;
 }
