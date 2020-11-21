@@ -10,20 +10,20 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
 
-//    @ExceptionHandler(value = Exception.class)
-//    public ResponseEntity<Object> handleGeneraException(Exception e) {
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                .body(new ErrorDto(e.getMessage()));
-//    }
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<Object> handleGeneraException(Exception e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorDto(e.getMessage()));
+    }
 
-    @ExceptionHandler(value = EntityAlreadyExistsException.class)
-    public ResponseEntity<Object> handleEntityExists(EntityAlreadyExistsException e) {
+    @ExceptionHandler(value = ConflictException.class)
+    public ResponseEntity<Object> handleEntityExists(ConflictException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorDto(e.getMessage()));
     }
 
-    @ExceptionHandler(value = PasswordValidationException.class)
-    public ResponseEntity<Object> handlePasswordValidation(PasswordValidationException e) {
+    @ExceptionHandler(value = BadRequestException.class)
+    public ResponseEntity<Object> handlePasswordValidation(BadRequestException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorDto(e.getMessage()));
     }
@@ -31,12 +31,6 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = EmailException.class)
     public ResponseEntity<Object> handleEmailException(EmailException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorDto(e.getMessage()));
-    }
-
-    @ExceptionHandler(value = ExpiryException.class)
-    public ResponseEntity<Object> handleExpiryException(ExpiryException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorDto(e.getMessage()));
     }
 

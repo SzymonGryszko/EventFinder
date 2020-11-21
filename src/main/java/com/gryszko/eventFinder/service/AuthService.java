@@ -40,15 +40,15 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     @Transactional
-    public void signup(RegisterRequest registerRequest) throws EntityAlreadyExistsException, PasswordValidationException, EmailException {
+    public void signup(RegisterRequest registerRequest) throws ConflictException, BadRequestException, EmailException {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new EntityAlreadyExistsException("Username already exists");
+            throw new ConflictException("Username already exists");
         }
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new EntityAlreadyExistsException("Email already exists");
+            throw new ConflictException("Email already exists");
         }
         if (!PasswordValidator.validate(registerRequest.getPassword())) {
-            throw new PasswordValidationException("Password needs to be between 8 and 30 characters," +
+            throw new BadRequestException("Password needs to be between 8 and 30 characters," +
                     " contain at least one digit, at least one lower and uppercase letter, no whitespaces allowed");
         }
         User user = new User();
@@ -80,15 +80,15 @@ public class AuthService {
         return token;
     }
 
-    public void verifyAccount(String token) throws ExpiryException, NotFoundException {
+    public void verifyAccount(String token) throws BadRequestException, NotFoundException {
         Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
-        verificationToken.orElseThrow(() -> new ExpiryException("Invalid Token"));
+        verificationToken.orElseThrow(() -> new BadRequestException("Invalid Token"));
 
         if (verificationToken.get().getExpirationDate().isAfter(Instant.now())) {
             fetchUserAndEnable(verificationToken.get());
             verificationTokenRepository.delete(verificationToken.get());
         } else {
-            throw new ExpiryException("Token has expired");
+            throw new BadRequestException("Token has expired");
         }
 
     }
@@ -137,12 +137,12 @@ public class AuthService {
 
 
     @Transactional
-    public void resetPassword(PasswordResetRequest passwordResetRequest, String token) throws PasswordValidationException, NotFoundException, ExpiryException {
+    public void resetPassword(PasswordResetRequest passwordResetRequest, String token) throws BadRequestException, NotFoundException, BadRequestException {
         if (!passwordResetRequest.getNewPassword().equals(passwordResetRequest.getConfirmationPassword())) {
-            throw new PasswordValidationException("New password is not the same as confirmation password");
+            throw new BadRequestException("New password is not the same as confirmation password");
         }
         if (!PasswordValidator.validate(passwordResetRequest.getNewPassword())) {
-            throw new PasswordValidationException("Password needs to be between 8 and 30 characters," +
+            throw new BadRequestException("Password needs to be between 8 and 30 characters," +
                     " contain at least one digit, at least one lower and uppercase letter, no whitespaces allowed");
         }
 
@@ -156,12 +156,12 @@ public class AuthService {
 
             verificationTokenRepository.delete(passwordResetToken);
         } else {
-            throw new ExpiryException("Token has expired");
+            throw new BadRequestException("Token has expired");
         }
 
     }
 
-    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) throws ExpiryException, NotFoundException {
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) throws NotFoundException, BadRequestException {
         refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
 
         User user = userRepository.findByUsername(refreshTokenRequest.getUsername())

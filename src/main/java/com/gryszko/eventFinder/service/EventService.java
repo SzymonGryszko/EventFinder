@@ -28,16 +28,22 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final EventDateFormatter eventDateFormatter;
     private final AuthService authService;
     private final EventMapper eventMapper;
     private final UserRepository userRepository;
     private final MailService mailService;
     private final EventFinderStringBuilder stringBuilder;
+    private final EventDateFormatter eventDateFormatter;
 
-    public void save(EventRequest eventRequest) throws UnauthorizedException {
-        Event eventToBeSaved = eventMapper.mapEventRequestToEntity(eventRequest);
-        eventRepository.save(eventToBeSaved);
+    public void save(EventRequest eventRequest) throws UnauthorizedException, BadRequestException {
+        Date startDate = eventDateFormatter.formatStringDateToSQLDate(eventRequest.getStartingDate());
+        Date endDate = eventDateFormatter.formatStringDateToSQLDate(eventRequest.getEndDate());
+        if (!endDate.before(startDate)) {
+            Event eventToBeSaved = eventMapper.mapEventRequestToEntity(eventRequest);
+            eventRepository.save(eventToBeSaved);
+        } else {
+            throw new BadRequestException("End date cannot be later than start date");
+        }
 
     }
 
@@ -96,15 +102,15 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public void signupUserForEvent(String username, Long eventId) throws NotFoundException, EmailException, EntityAlreadyExistsException, ExpiryException {
+    public void signupUserForEvent(String username, Long eventId) throws NotFoundException, EmailException, ConflictException, BadRequestException {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found"));
         User organizer = event.getOrganizer();
 
         if (event.getAttendees().contains(user)) {
-            throw new EntityAlreadyExistsException("You have already signed up for this event");
+            throw new ConflictException("You have already signed up for this event");
         } else if (event.getEndDate().after(Date.from(Instant.now()))) {
-            throw new ExpiryException("You cannot signup for event that has already ended");
+            throw new BadRequestException("You cannot signup for event that has already ended");
         } else {
             event.getAttendees().add(user);
             eventRepository.save(event);

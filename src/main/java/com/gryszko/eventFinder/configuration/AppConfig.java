@@ -1,8 +1,6 @@
 package com.gryszko.eventFinder.configuration;
 
-import com.gryszko.eventFinder.mapper.EventMapper;
 import com.gryszko.eventFinder.security.JwtAuthenticationFilter;
-import com.gryszko.eventFinder.utils.EventDateFormatter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

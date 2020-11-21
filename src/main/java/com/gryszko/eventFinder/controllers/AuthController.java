@@ -18,13 +18,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody RegisterRequest registerRequest) throws EmailException, PasswordValidationException, EntityAlreadyExistsException {
+    public ResponseEntity<String> signup(@Valid @RequestBody RegisterRequest registerRequest) throws EmailException, BadRequestException, ConflictException {
         authService.signup(registerRequest);
         return new ResponseEntity<>("User Registration successful", HttpStatus.OK);
     }
 
     @GetMapping("/accountVerification/{token}")
-    public ResponseEntity<String> verifyAccount(@PathVariable String token) throws ExpiryException, NotFoundException {
+    public ResponseEntity<String> verifyAccount(@PathVariable String token) throws BadRequestException, NotFoundException {
         authService.verifyAccount(token);
         return new ResponseEntity<>("Account activated successfully", HttpStatus.OK);
 
@@ -49,14 +49,14 @@ public class AuthController {
 
     @PutMapping("/resetPassword/{token}")
     public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest,
-                                                @PathVariable(name = "token") String token) throws PasswordValidationException, NotFoundException, ExpiryException {
+                                                @PathVariable(name = "token") String token) throws BadRequestException, NotFoundException, BadRequestException {
         authService.resetPassword(passwordResetRequest, token);
         return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
 
     }
 
     @PostMapping("/refreshToken")
-    public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) throws NotFoundException, ExpiryException {
+    public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) throws NotFoundException, BadRequestException {
         return authService.refreshToken(refreshTokenRequest);
     }
 

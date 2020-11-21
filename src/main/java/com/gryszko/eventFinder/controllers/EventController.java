@@ -5,8 +5,10 @@ import com.gryszko.eventFinder.dto.EventResponse;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.service.EventService;
 import lombok.AllArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +20,7 @@ public class EventController {
     private EventService eventService;
 
     @PostMapping
-    public void createEvent(@RequestBody EventRequest eventRequest) throws UnauthorizedException {
+    public void createEvent(@Valid @RequestBody EventRequest eventRequest) throws UnauthorizedException, BadRequestException {
         eventService.save(eventRequest);
     }
 
@@ -49,7 +51,7 @@ public class EventController {
     }
 
     @PostMapping("/eventSignup")
-    public void signupUserForEvent(@RequestParam String username, Long eventId) throws NotFoundException, EmailException, EntityAlreadyExistsException, ExpiryException {
+    public void signupUserForEvent(@RequestParam String username, Long eventId) throws NotFoundException, EmailException, ConflictException, BadRequestException {
         eventService.signupUserForEvent(username, eventId);
     }
 
