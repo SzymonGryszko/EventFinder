@@ -3,14 +3,12 @@ package com.gryszko.eventFinder.controllers;
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
 import com.gryszko.eventFinder.exception.*;
-import com.gryszko.eventFinder.model.Event;
-import com.gryszko.eventFinder.repository.EventRepository;
 import com.gryszko.eventFinder.service.EventService;
 import lombok.AllArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @RestController
@@ -25,8 +23,13 @@ public class EventController {
     }
 
     @GetMapping
-    public List<EventResponse> getAllEvents() {
-        return eventService.getAllEvents();
+    public List<EventResponse> getAllEventsWithStartDateTodayOrLater(@RequestParam(required = false) String city, String keyWord) {
+        return eventService.getAllEventsWithStartDateTodayOrLater(city, keyWord);
+    }
+
+    @GetMapping("/cities")
+    public Set<String> getAllCitiesFromEvents() {
+        return eventService.getAllCitiesFromEvents();
     }
 
     @GetMapping("/{id}")
@@ -56,7 +59,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteEvent(@PathVariable Long id) {
+    public void deleteEvent(@PathVariable Long id) throws NotFoundException, EmailException {
         eventService.deleteEvent(id);
     }
 

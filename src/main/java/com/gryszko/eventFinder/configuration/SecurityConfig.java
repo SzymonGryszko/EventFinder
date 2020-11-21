@@ -41,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.DELETE, "/api/events/**").hasAnyRole(ORGANIZER.toString(), ADMIN.toString())
                 .antMatchers(HttpMethod.GET, "/api/events/**").permitAll()
                 .antMatchers(HttpMethod.GET,"/api/comments/**").permitAll()
-                .antMatchers(HttpMethod.POST,"/api/comments/**").permitAll()
+                .antMatchers(HttpMethod.POST,"/api/comments/**").authenticated()
                 .anyRequest()
                 .authenticated();
         http.addFilterBefore(jwtAuthenticationFilter,

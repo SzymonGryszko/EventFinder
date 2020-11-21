@@ -1,6 +1,6 @@
 package com.gryszko.eventFinder.service;
 
-import com.github.marlonlom.utilities.timeago.TimeAgo;
+import com.google.common.base.Strings;
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
 import com.gryszko.eventFinder.exception.*;
@@ -11,6 +11,7 @@ import com.gryszko.eventFinder.model.User;
 import com.gryszko.eventFinder.repository.EventRepository;
 import com.gryszko.eventFinder.repository.UserRepository;
 import com.gryszko.eventFinder.utils.EventDateFormatter;
+import com.gryszko.eventFinder.utils.EventFinderStringBuilder;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class EventService {
     private final EventMapper eventMapper;
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final EventFinderStringBuilder stringBuilder;
 
     public void save(EventRequest eventRequest) throws UnauthorizedException {
         Event eventToBeSaved = eventMapper.mapEventRequestToEntity(eventRequest);
@@ -40,11 +42,26 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public List<EventResponse> getAllEvents() {
-        return eventRepository.findAll()
+    public List<EventResponse> getAllEventsWithStartDateTodayOrLater(String city, String keyWord) {
+
+        java.util.Date today = Date.from(Instant.now());
+
+        if (!Strings.isNullOrEmpty(city) && Strings.isNullOrEmpty(keyWord)) {
+            return eventRepository.findAllByCityContainingAndStartingDateGreaterThanEqualOrderByStartingDateDesc(city, today)
+                    .stream()
+                    .map(eventMapper::mapEventEntityToEventResponse)
+                    .collect(Collectors.toList());
+        } else if (Strings.isNullOrEmpty(city) && !Strings.isNullOrEmpty(keyWord)) {
+            return eventRepository.findAllByDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateDesc(keyWord, keyWord, today)
+                    .stream()
+                    .map(eventMapper::mapEventEntityToEventResponse)
+                    .collect(Collectors.toList());
+        }
+        return eventRepository.findAllByStartingDateGreaterThanEqualOrderByStartingDateDesc(today)
                 .stream()
                 .map(eventMapper::mapEventEntityToEventResponse)
                 .collect(Collectors.toList());
+
     }
 
     public EventResponse getEvent(Long id) throws NotFoundException {
@@ -58,7 +75,7 @@ public class EventService {
         User user = authService.getCurrentUser();
 
         if (user.getUsername().equals(username)) {
-        System.out.println(user.getUsername());
+            System.out.println(user.getUsername());
             return eventRepository
                     .getAllByOrganizer(user)
                     .stream()
@@ -86,7 +103,7 @@ public class EventService {
 
         if (event.getAttendees().contains(user)) {
             throw new EntityAlreadyExistsException("You have already signed up for this event");
-        }else if(event.getEndDate().after(Date.from(Instant.now()))) {
+        } else if (event.getEndDate().after(Date.from(Instant.now()))) {
             throw new ExpiryException("You cannot signup for event that has already ended");
         } else {
             event.getAttendees().add(user);
@@ -106,18 +123,34 @@ public class EventService {
         event.setAttendees(attendees);
         Event updatedEvent = eventRepository.save(event);
 
-        sendNotificationEmailToAllAttendees(attendees, id, eventEntity.getTitle());
+        String emailTitle = "One of your events has just been updated!";
+        String emailBody = stringBuilder.build("Even you signed up for - ", event.getTitle(), " has just been updated, check it out http://localhost:8080/api/events/", event.getEventId().toString());
+
+        sendNotificationEmailToAllAttendees(attendees, emailTitle, emailBody);
         return eventMapper.mapEventEntityToEventResponse(updatedEvent);
     }
 
-    private void sendNotificationEmailToAllAttendees(Set<User> attendees, Long eventId, String title) throws EmailException {
-        for (User attendee:attendees) {
-            mailService.sendMail(new NotificationEmail("One of your events has just been updated!",
-                    attendee.getEmail(), "Even you signed up for - " + title +  "has just been updated, check it out http://localhost:8080/api/events/" + eventId));
+    private void sendNotificationEmailToAllAttendees(Set<User> attendees, String emailTitle, String emailBody) throws EmailException {
+        for (User attendee : attendees) {
+            mailService.sendMail(new NotificationEmail(emailTitle, attendee.getEmail(), emailBody));
         }
     }
 
-    public void deleteEvent(Long id) {
+    public void deleteEvent(Long id) throws NotFoundException, EmailException {
+        Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException("Event not found"));
+        Set<User> attendees = event.getAttendees();
+        String emailTitle = "One of your events has just been cancelled!";
+        String emailBody = stringBuilder.build("Even you signed up for - ", event.getTitle(), " has just been cancelled, contact ", event.getOrganizer().getEmail(), " for more info");
+
+        sendNotificationEmailToAllAttendees(attendees, emailTitle, emailBody);
         eventRepository.deleteById(id);
     }
+
+    public Set<String> getAllCitiesFromEvents() {
+        return eventRepository.findAllByStartingDateGreaterThanEqualOrderByStartingDateDesc(java.util.Date.from(Instant.now()))
+                .stream()
+                .map(event -> event.getCity())
+                .collect(Collectors.toSet());
+    }
+
 }
