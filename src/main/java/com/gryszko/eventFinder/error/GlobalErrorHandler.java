@@ -34,8 +34,8 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
                 .body(new ErrorDto(e.getMessage()));
     }
 
-    @ExceptionHandler(value = TokenException.class)
-    public ResponseEntity<Object> handleTokenException(TokenException e) {
+    @ExceptionHandler(value = ExpiryException.class)
+    public ResponseEntity<Object> handleExpiryException(ExpiryException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorDto(e.getMessage()));
     }

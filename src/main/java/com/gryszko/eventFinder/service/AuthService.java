@@ -80,15 +80,15 @@ public class AuthService {
         return token;
     }
 
-    public void verifyAccount(String token) throws TokenException, NotFoundException {
+    public void verifyAccount(String token) throws ExpiryException, NotFoundException {
         Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
-        verificationToken.orElseThrow(() -> new TokenException("Invalid Token"));
+        verificationToken.orElseThrow(() -> new ExpiryException("Invalid Token"));
 
         if (verificationToken.get().getExpirationDate().isAfter(Instant.now())) {
             fetchUserAndEnable(verificationToken.get());
             verificationTokenRepository.delete(verificationToken.get());
         } else {
-            throw new TokenException("Token has expired");
+            throw new ExpiryException("Token has expired");
         }
 
     }
@@ -137,7 +137,7 @@ public class AuthService {
 
 
     @Transactional
-    public void resetPassword(PasswordResetRequest passwordResetRequest, String token) throws PasswordValidationException, NotFoundException, TokenException {
+    public void resetPassword(PasswordResetRequest passwordResetRequest, String token) throws PasswordValidationException, NotFoundException, ExpiryException {
         if (!passwordResetRequest.getNewPassword().equals(passwordResetRequest.getConfirmationPassword())) {
             throw new PasswordValidationException("New password is not the same as confirmation password");
         }
@@ -156,12 +156,12 @@ public class AuthService {
 
             verificationTokenRepository.delete(passwordResetToken);
         } else {
-            throw new TokenException("Token has expired");
+            throw new ExpiryException("Token has expired");
         }
 
     }
 
-    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) throws TokenException, NotFoundException {
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) throws ExpiryException, NotFoundException {
         refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
 
         User user = userRepository.findByUsername(refreshTokenRequest.getUsername())

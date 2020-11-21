@@ -1,6 +1,6 @@
 package com.gryszko.eventFinder.service;
 
-import com.gryszko.eventFinder.exception.TokenException;
+import com.gryszko.eventFinder.exception.ExpiryException;
 import com.gryszko.eventFinder.model.RefreshToken;
 import com.gryszko.eventFinder.repository.RefreshTokenRepository;
 import lombok.AllArgsConstructor;
@@ -25,9 +25,9 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
-    void validateRefreshToken(String token) throws TokenException {
+    void validateRefreshToken(String token) throws ExpiryException {
         refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new TokenException("Invalid refresh Token"));
+                .orElseThrow(() -> new ExpiryException("Invalid refresh Token"));
     }
 
     public void deleteRefreshToken(String token) {

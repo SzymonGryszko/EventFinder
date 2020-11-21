@@ -24,7 +24,7 @@ public class AuthController {
     }
 
     @GetMapping("/accountVerification/{token}")
-    public ResponseEntity<String> verifyAccount(@PathVariable String token) throws TokenException, NotFoundException {
+    public ResponseEntity<String> verifyAccount(@PathVariable String token) throws ExpiryException, NotFoundException {
         authService.verifyAccount(token);
         return new ResponseEntity<>("Account activated successfully", HttpStatus.OK);
 
@@ -49,14 +49,14 @@ public class AuthController {
 
     @PutMapping("/resetPassword/{token}")
     public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest,
-                                                @PathVariable(name = "token", required = true) String token) throws PasswordValidationException, NotFoundException, TokenException {
+                                                @PathVariable(name = "token", required = true) String token) throws PasswordValidationException, NotFoundException, ExpiryException {
         authService.resetPassword(passwordResetRequest, token);
         return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
 
     }
 
     @PostMapping("/refreshToken")
-    public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) throws NotFoundException, TokenException {
+    public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) throws NotFoundException, ExpiryException {
         return authService.refreshToken(refreshTokenRequest);
     }
 

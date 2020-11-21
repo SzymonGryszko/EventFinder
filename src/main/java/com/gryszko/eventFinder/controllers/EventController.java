@@ -2,10 +2,7 @@ package com.gryszko.eventFinder.controllers;
 
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
-import com.gryszko.eventFinder.exception.EmailException;
-import com.gryszko.eventFinder.exception.EntityAlreadyExistsException;
-import com.gryszko.eventFinder.exception.NotFoundException;
-import com.gryszko.eventFinder.exception.UnauthorizedException;
+import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.model.Event;
 import com.gryszko.eventFinder.repository.EventRepository;
 import com.gryszko.eventFinder.service.EventService;
@@ -49,22 +46,18 @@ public class EventController {
     }
 
     @PostMapping("/eventSignup")
-    public void signupUserForEvent(@RequestParam String username, Long eventId) throws NotFoundException, EmailException, EntityAlreadyExistsException {
+    public void signupUserForEvent(@RequestParam String username, Long eventId) throws NotFoundException, EmailException, EntityAlreadyExistsException, ExpiryException {
         eventService.signupUserForEvent(username, eventId);
     }
 
-//    @PutMapping("/update/{id}")
-//    public EventResponse updateEvent(@PathVariable Long id) {
-//        return eventService.updateEvent(id);
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public EventResponse deleteEvent(@PathVariable Long id) {
-//        return eventService.deleteEvent(id);
-//    }
-//
-//    @PostMapping("/{id}/addAttendee")
-//    public Integer addAttendeeToEvent(@PathVariable Long id) {
-//        return eventService.addAttendeeToEvent(id);
-//    }
+    @PutMapping("/update/{id}")
+    public EventResponse updateEvent(@PathVariable Long id, @RequestBody EventRequest eventRequest) throws NotFoundException, EmailException {
+        return eventService.updateEvent(id, eventRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteEvent(@PathVariable Long id) {
+        eventService.deleteEvent(id);
+    }
+
 }
