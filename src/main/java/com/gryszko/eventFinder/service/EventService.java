@@ -3,6 +3,7 @@ package com.gryszko.eventFinder.service;
 import com.google.common.base.Strings;
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
+import com.gryszko.eventFinder.dto.EventSignupRequest;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.mapper.EventMapper;
 import com.gryszko.eventFinder.model.Event;
@@ -102,22 +103,22 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public void signupUserForEvent(String username, Long eventId) throws NotFoundException, EmailException, ConflictException, BadRequestException {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found"));
+    public void signupUserForEvent(EventSignupRequest eventSignupRequest) throws NotFoundException, EmailException, ConflictException, BadRequestException {
+        User user = userRepository.findByUsername(eventSignupRequest.getUsername()).orElseThrow(() -> new NotFoundException("User not found"));
+        Event event = eventRepository.findById(eventSignupRequest.getEventId()).orElseThrow(() -> new NotFoundException("Event not found"));
         User organizer = event.getOrganizer();
 
         if (event.getAttendees().contains(user)) {
             throw new ConflictException("You have already signed up for this event");
-        } else if (event.getEndDate().after(Date.from(Instant.now()))) {
+        } else if (event.getEndDate().before(Date.from(Instant.now()))) {
             throw new BadRequestException("You cannot signup for event that has already ended");
         } else {
             event.getAttendees().add(user);
             eventRepository.save(event);
         }
 
-        mailService.sendMail(new NotificationEmail(username + " signed up for your event - " + event.getTitle(),
-                organizer.getEmail(), "New person just signed up for your event, check it out http://localhost:8080/api/events/" + eventId));
+        mailService.sendMail(new NotificationEmail(eventSignupRequest.getUsername() + " signed up for your event - " + event.getTitle(),
+                organizer.getEmail(), "New person just signed up for your event, check it out http://localhost:8080/api/events/" + eventSignupRequest.getEventId()));
 
     }
 

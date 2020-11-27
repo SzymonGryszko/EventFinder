@@ -37,7 +37,7 @@ public class CommentService {
 
     public List<CommentDto> getAllCommentsForEvent(Long eventId) throws NotFoundException {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found " + eventId.toString()));
-        return commentRepository.findByEvent(event)
+        return commentRepository.findByEventOrderByIdDesc(event)
                 .stream()
                 .map(commentMapper::mapCommentEntityToDto)
                 .collect(Collectors.toList());

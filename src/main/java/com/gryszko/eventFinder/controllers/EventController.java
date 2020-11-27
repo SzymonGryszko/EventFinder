@@ -2,6 +2,7 @@ package com.gryszko.eventFinder.controllers;
 
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
+import com.gryszko.eventFinder.dto.EventSignupRequest;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.service.EventService;
 import lombok.AllArgsConstructor;
@@ -45,14 +46,14 @@ public class EventController {
         return eventService.getEventsByOrganizer(username);
     }
 
-    @GetMapping("/my-events/{username}")
-    public List<EventResponse> getEventsByAttendee(@PathVariable String username) throws NotFoundException {
-        return eventService.getEventsByAttendee(username);
+    @GetMapping("/my-events/{name}")
+    public List<EventResponse> getEventsByAttendee(@PathVariable String name) throws NotFoundException {
+        return eventService.getEventsByAttendee(name);
     }
 
     @PostMapping("/eventSignup")
-    public void signupUserForEvent(@RequestParam String username, Long eventId) throws NotFoundException, EmailException, ConflictException, BadRequestException {
-        eventService.signupUserForEvent(username, eventId);
+    public void signupUserForEvent(@RequestBody EventSignupRequest eventSignupRequest) throws NotFoundException, EmailException, ConflictException, BadRequestException {
+        eventService.signupUserForEvent(eventSignupRequest);
     }
 
     @PutMapping("/update/{id}")

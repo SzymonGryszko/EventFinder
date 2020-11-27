@@ -11,6 +11,6 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    List<Comment> findByEvent(Event event);
+    List<Comment> findByEventOrderByIdDesc(Event event);
     List<Comment> findAllByUser(User user);
 }
