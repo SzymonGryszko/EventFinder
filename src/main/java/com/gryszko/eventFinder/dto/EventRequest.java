@@ -20,5 +20,4 @@ public class EventRequest {
     private String description;
     private String city;
     private String address;
-
 }

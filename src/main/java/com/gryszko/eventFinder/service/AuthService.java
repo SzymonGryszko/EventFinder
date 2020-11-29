@@ -183,7 +183,7 @@ public class AuthService {
         refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public User getCurrentUser() throws UnauthorizedException {
         try{
             org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User)SecurityContextHolder

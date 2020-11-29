@@ -21,7 +21,7 @@ public class EventController {
     private EventService eventService;
 
     @PostMapping
-    public void createEvent(@Valid @RequestBody EventRequest eventRequest) throws UnauthorizedException, BadRequestException {
+    public void createEvent(@RequestBody EventRequest eventRequest) throws UnauthorizedException, BadRequestException {
         eventService.save(eventRequest);
     }
 

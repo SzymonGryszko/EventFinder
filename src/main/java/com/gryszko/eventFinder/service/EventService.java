@@ -39,13 +39,11 @@ public class EventService {
     public void save(EventRequest eventRequest) throws UnauthorizedException, BadRequestException {
         Date startDate = eventDateFormatter.formatStringDateToSQLDate(eventRequest.getStartingDate());
         Date endDate = eventDateFormatter.formatStringDateToSQLDate(eventRequest.getEndDate());
-        if (!endDate.before(startDate)) {
-            Event eventToBeSaved = eventMapper.mapEventRequestToEntity(eventRequest);
-            eventRepository.save(eventToBeSaved);
-        } else {
-            throw new BadRequestException("End date cannot be later than start date");
+        if (startDate.compareTo(endDate) == 1) {
+            throw new BadRequestException("End date before start date");
         }
-
+        Event eventToBeSaved = eventMapper.mapEventRequestToEntity(eventRequest);
+        eventRepository.save(eventToBeSaved);
     }
 
     @Transactional(readOnly = true)
@@ -77,12 +75,12 @@ public class EventService {
 
     }
 
-    public List<EventResponse> getEventsByOrganizer(String username) throws NotFoundException, UnauthorizedException {
+    public List<EventResponse> getEventsByOrganizer(String username) throws UnauthorizedException, NotFoundException {
 
-        User user = authService.getCurrentUser();
+        String currentUser = authService.getCurrentUser().getUsername();
 
-        if (user.getUsername().equals(username)) {
-            System.out.println(user.getUsername());
+        if (currentUser.equals(username)) {
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
             return eventRepository
                     .getAllByOrganizer(user)
                     .stream()
