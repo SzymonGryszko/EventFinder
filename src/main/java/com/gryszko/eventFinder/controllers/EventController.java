@@ -2,14 +2,12 @@ package com.gryszko.eventFinder.controllers;
 
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
-import com.gryszko.eventFinder.dto.EventSignupRequest;
+import com.gryszko.eventFinder.dto.EventSignuporResignRequest;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.service.EventService;
 import lombok.AllArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 
@@ -52,13 +50,18 @@ public class EventController {
     }
 
     @PostMapping("/eventSignup")
-    public void signupUserForEvent(@RequestBody EventSignupRequest eventSignupRequest) throws NotFoundException, EmailException, ConflictException, BadRequestException {
-        eventService.signupUserForEvent(eventSignupRequest);
+    public void signupUserForEvent(@RequestBody EventSignuporResignRequest eventSignuporResignRequest) throws NotFoundException, EmailException, ConflictException, BadRequestException {
+        eventService.signupUserForEvent(eventSignuporResignRequest);
     }
 
     @PutMapping("/update/{id}")
     public EventResponse updateEvent(@PathVariable Long id, @RequestBody EventRequest eventRequest) throws NotFoundException, EmailException, UnauthorizedException {
         return eventService.updateEvent(id, eventRequest);
+    }
+
+    @PutMapping("/resign")
+    public void resignFromEvent(@RequestBody EventSignuporResignRequest eventSignuporResignRequest) throws NotFoundException, EmailException {
+        eventService.resignFromEvent(eventSignuporResignRequest);
     }
 
     @DeleteMapping("/{id}")

@@ -12,9 +12,9 @@ import java.util.Optional;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    List<Event> findAllByStartingDateGreaterThanEqualOrderByStartingDateDesc(Date today);
-    List<Event> findAllByCityContainingAndStartingDateGreaterThanEqualOrderByStartingDateDesc(String city, Date today);
-    List<Event> findAllByDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateDesc(String keyDesc, String keyTitle, Date today);
+    List<Event> findAllByStartingDateGreaterThanEqualOrderByStartingDateAsc(Date today);
+    List<Event> findAllByCityContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(String city, Date today);
+    List<Event> findAllByDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(String keyDesc, String keyTitle, Date today);
     List<Event> getAllByOrganizer(User user);
     List<Event> getAllByAttendeesContains(User user);
 

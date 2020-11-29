@@ -3,7 +3,7 @@ package com.gryszko.eventFinder.service;
 import com.google.common.base.Strings;
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
-import com.gryszko.eventFinder.dto.EventSignupRequest;
+import com.gryszko.eventFinder.dto.EventSignuporResignRequest;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.mapper.EventMapper;
 import com.gryszko.eventFinder.model.Event;
@@ -52,17 +52,17 @@ public class EventService {
         java.util.Date today = Date.from(Instant.now());
 
         if (!Strings.isNullOrEmpty(city) && Strings.isNullOrEmpty(keyWord)) {
-            return eventRepository.findAllByCityContainingAndStartingDateGreaterThanEqualOrderByStartingDateDesc(city, today)
+            return eventRepository.findAllByCityContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(city, today)
                     .stream()
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
         } else if (Strings.isNullOrEmpty(city) && !Strings.isNullOrEmpty(keyWord)) {
-            return eventRepository.findAllByDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateDesc(keyWord, keyWord, today)
+            return eventRepository.findAllByDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(keyWord, keyWord, today)
                     .stream()
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
         }
-        return eventRepository.findAllByStartingDateGreaterThanEqualOrderByStartingDateDesc(today)
+        return eventRepository.findAllByStartingDateGreaterThanEqualOrderByStartingDateAsc(today)
                 .stream()
                 .map(eventMapper::mapEventEntityToEventResponse)
                 .collect(Collectors.toList());
@@ -101,9 +101,9 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public void signupUserForEvent(EventSignupRequest eventSignupRequest) throws NotFoundException, EmailException, ConflictException, BadRequestException {
-        User user = userRepository.findByUsername(eventSignupRequest.getUsername()).orElseThrow(() -> new NotFoundException("User not found"));
-        Event event = eventRepository.findById(eventSignupRequest.getEventId()).orElseThrow(() -> new NotFoundException("Event not found"));
+    public void signupUserForEvent(EventSignuporResignRequest eventSignuporResignRequest) throws NotFoundException, EmailException, ConflictException, BadRequestException {
+        User user = userRepository.findByUsername(eventSignuporResignRequest.getUsername()).orElseThrow(() -> new NotFoundException("User not found"));
+        Event event = eventRepository.findById(eventSignuporResignRequest.getEventId()).orElseThrow(() -> new NotFoundException("Event not found"));
         User organizer = event.getOrganizer();
 
         if (event.getAttendees().contains(user)) {
@@ -115,8 +115,8 @@ public class EventService {
             eventRepository.save(event);
         }
 
-        mailService.sendMail(new NotificationEmail(eventSignupRequest.getUsername() + " signed up for your event - " + event.getTitle(),
-                organizer.getEmail(), "New person just signed up for your event, check it out http://localhost:8080/api/events/" + eventSignupRequest.getEventId()));
+        mailService.sendMail(new NotificationEmail(eventSignuporResignRequest.getUsername() + " signed up for your event - " + event.getTitle(),
+                organizer.getEmail(), "New person just signed up for your event, check it out http://localhost:8080/api/events/" + eventSignuporResignRequest.getEventId()));
 
     }
 
@@ -152,10 +152,25 @@ public class EventService {
     }
 
     public Set<String> getAllCitiesFromEvents() {
-        return eventRepository.findAllByStartingDateGreaterThanEqualOrderByStartingDateDesc(java.util.Date.from(Instant.now()))
+        return eventRepository.findAllByStartingDateGreaterThanEqualOrderByStartingDateAsc(java.util.Date.from(Instant.now()))
                 .stream()
                 .map(event -> event.getCity())
                 .collect(Collectors.toSet());
     }
 
+    public void resignFromEvent(EventSignuporResignRequest eventSignuporResignRequest) throws NotFoundException, EmailException {
+        User user = userRepository.findByUsername(eventSignuporResignRequest.getUsername()).orElseThrow(() -> new NotFoundException("User not found"));
+        Event event = eventRepository.findById(eventSignuporResignRequest.getEventId()).orElseThrow(() -> new NotFoundException("Event not found"));
+        User organizer = event.getOrganizer();
+
+        if (!event.getAttendees().contains(user)) {
+            throw new NotFoundException("User was not signed up for this event");
+        } else {
+            event.getAttendees().remove(user);
+            eventRepository.save(event);
+        }
+        mailService.sendMail(new NotificationEmail(eventSignuporResignRequest.getUsername() + " signed up for your event - " + event.getTitle(),
+                organizer.getEmail(), "One person just resigned from your event, check it out http://localhost:8080/api/events/" + eventSignuporResignRequest.getEventId()));
+
+    }
 }

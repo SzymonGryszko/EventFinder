@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class EventSignupRequest {
+public class EventSignuporResignRequest {
     private String username;
     private Long eventId;
 }
