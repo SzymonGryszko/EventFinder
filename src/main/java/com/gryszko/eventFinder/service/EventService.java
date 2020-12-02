@@ -61,6 +61,11 @@ public class EventService {
                     .stream()
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
+  } else if (!Strings.isNullOrEmpty(city) && !Strings.isNullOrEmpty(keyWord)) {
+            return eventRepository.findAllByCityContainingAndDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(city, keyWord, keyWord, today)
+                    .stream()
+                    .map(eventMapper::mapEventEntityToEventResponse)
+                    .collect(Collectors.toList());
         }
         return eventRepository.findAllByStartingDateGreaterThanEqualOrderByStartingDateAsc(today)
                 .stream()
@@ -105,10 +110,12 @@ public class EventService {
         User user = userRepository.findByUsername(eventSignuporResignRequest.getUsername()).orElseThrow(() -> new NotFoundException("User not found"));
         Event event = eventRepository.findById(eventSignuporResignRequest.getEventId()).orElseThrow(() -> new NotFoundException("Event not found"));
         User organizer = event.getOrganizer();
+        java.util.Date today = Date.from(Instant.now());
+
 
         if (event.getAttendees().contains(user)) {
             throw new ConflictException("You have already signed up for this event");
-        } else if (event.getEndDate().before(Date.from(Instant.now()))) {
+        } else if (event.getEndDate().compareTo(today) > 1) {
             throw new BadRequestException("You cannot signup for event that has already ended");
         } else {
             event.getAttendees().add(user);
@@ -169,7 +176,7 @@ public class EventService {
             event.getAttendees().remove(user);
             eventRepository.save(event);
         }
-        mailService.sendMail(new NotificationEmail(eventSignuporResignRequest.getUsername() + " signed up for your event - " + event.getTitle(),
+        mailService.sendMail(new NotificationEmail(eventSignuporResignRequest.getUsername() + " resigned from your - " + event.getTitle(),
                 organizer.getEmail(), "One person just resigned from your event, check it out http://localhost:8080/api/events/" + eventSignuporResignRequest.getEventId()));
 
     }
