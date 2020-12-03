@@ -19,7 +19,7 @@ import static javax.persistence.GenerationType.*;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "eventfinder_users")
+@Table(name = "eventfinder_usr")
 public class User {
 
     @Id
