@@ -60,7 +60,12 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setCreated(Instant.now());
         user.setEnabled(true); //false with implemented mailing server
-        user.setUserRole(generateUserRoleEnumFromString(registerRequest.getAccountRole()));
+        switch (registerRequest.getAccountRole()) {
+            case "ORGANIZER_ROLE":
+                user.setUserRole(UserRole.ORGANIZER);
+            default:
+                user.setUserRole(UserRole.USER);
+        }
         user.setEvents(new HashSet<>());
 
         userRepository.save(user);
@@ -70,15 +75,6 @@ public class AuthService {
         mailService.sendMail(new NotificationEmail("Please activate your account",
                 user.getEmail(), "Please click the link below to activate your account + " +
                 appConfig.getUrlBackend() + "api/auth/accountVerification/" + token));
-    }
-
-    private UserRole generateUserRoleEnumFromString(String userRole) {
-        switch (userRole) {
-            case "ORGANIZER_ROLE":
-                return UserRole.ORGANIZER;
-            default:
-                return UserRole.USER;
-        }
     }
 
     private String generateVerificationToken(User user) {
