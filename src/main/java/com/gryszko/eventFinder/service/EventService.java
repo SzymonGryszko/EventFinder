@@ -1,6 +1,7 @@
 package com.gryszko.eventFinder.service;
 
 import com.google.common.base.Strings;
+import com.gryszko.eventFinder.configuration.AppConfig;
 import com.gryszko.eventFinder.dto.EventRequest;
 import com.gryszko.eventFinder.dto.EventResponse;
 import com.gryszko.eventFinder.dto.EventSignuporResignRequest;
@@ -35,6 +36,7 @@ public class EventService {
     private final MailService mailService;
     private final EventFinderStringBuilder stringBuilder;
     private final EventDateFormatter eventDateFormatter;
+    private final AppConfig appConfig;
 
     public void save(EventRequest eventRequest) throws UnauthorizedException, BadRequestException {
         Date startDate = eventDateFormatter.formatStringDateToSQLDate(eventRequest.getStartingDate());
@@ -123,7 +125,7 @@ public class EventService {
         }
 
         mailService.sendMail(new NotificationEmail(eventSignuporResignRequest.getUsername() + " signed up for your event - " + event.getTitle(),
-                organizer.getEmail(), "New person just signed up for your event, check it out http://localhost:8080/api/events/" + eventSignuporResignRequest.getEventId()));
+                organizer.getEmail(), "New person just signed up for your event, check it out"+ appConfig.getUrlFrontend() +"/events/" + eventSignuporResignRequest.getEventId()));
 
     }
 
@@ -136,7 +138,7 @@ public class EventService {
         Event updatedEvent = eventRepository.save(event);
 
         String emailTitle = "One of your events has just been updated!";
-        String emailBody = stringBuilder.build("Even you signed up for - ", event.getTitle(), " has just been updated, check it out http://localhost:8080/api/events/", event.getEventId().toString());
+        String emailBody = stringBuilder.build("Even you signed up for - ", event.getTitle(), " has just been updated, check it out "+ appConfig.getUrlFrontend() +"/events/", event.getEventId().toString());
 
         sendNotificationEmailToAllAttendees(attendees, emailTitle, emailBody);
         return eventMapper.mapEventEntityToEventResponse(updatedEvent);
@@ -177,7 +179,7 @@ public class EventService {
             eventRepository.save(event);
         }
         mailService.sendMail(new NotificationEmail(eventSignuporResignRequest.getUsername() + " resigned from your - " + event.getTitle(),
-                organizer.getEmail(), "One person just resigned from your event, check it out http://localhost:8080/api/events/" + eventSignuporResignRequest.getEventId()));
+                organizer.getEmail(), "One person just resigned from your event, check it out "+ appConfig.getUrlFrontend() +"/events/" + eventSignuporResignRequest.getEventId()));
 
     }
 }

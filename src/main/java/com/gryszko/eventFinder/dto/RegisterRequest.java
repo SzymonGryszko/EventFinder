@@ -21,4 +21,5 @@ public class RegisterRequest {
     private String email;
     @NotEmpty(message = "Password cannot be empty")
     private String password;
+    private String accountRole;
 }

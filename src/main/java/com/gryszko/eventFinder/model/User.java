@@ -19,6 +19,7 @@ import static javax.persistence.GenerationType.*;
 @NoArgsConstructor
 @Data
 @Entity
+@Table(name = "eventfinder_users")
 public class User {
 
     @Id

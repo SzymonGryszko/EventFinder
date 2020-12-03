@@ -1,5 +1,6 @@
 package com.gryszko.eventFinder.service;
 
+import com.gryszko.eventFinder.configuration.AppConfig;
 import com.gryszko.eventFinder.dto.*;
 import com.gryszko.eventFinder.exception.*;
 import com.gryszko.eventFinder.model.NotificationEmail;
@@ -38,6 +39,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final JwtConfig jwtConfig;
     private final RefreshTokenService refreshTokenService;
+    private final AppConfig appConfig;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) throws ConflictException, BadRequestException, EmailException {
@@ -51,13 +53,14 @@ public class AuthService {
             throw new BadRequestException("Password needs to be between 8 and 30 characters," +
                     " contain at least one digit, at least one lower and uppercase letter, no whitespaces allowed");
         }
+        System.out.println(registerRequest.getAccountRole());
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setCreated(Instant.now());
-        user.setEnabled(false);
-        user.setUserRole(UserRole.USER);
+        user.setEnabled(true); //false with implemented mailing server
+        user.setUserRole(generateUserRoleEnumFromString(registerRequest.getAccountRole()));
         user.setEvents(new HashSet<>());
 
         userRepository.save(user);
@@ -66,7 +69,16 @@ public class AuthService {
 
         mailService.sendMail(new NotificationEmail("Please activate your account",
                 user.getEmail(), "Please click the link below to activate your account + " +
-                "http://localhost:8080/api/auth/accountVerification/" + token));
+                appConfig.getUrlBackend() + "api/auth/accountVerification/" + token));
+    }
+
+    private UserRole generateUserRoleEnumFromString(String userRole) {
+        switch (userRole) {
+            case "ORGANIZER_ROLE":
+                return UserRole.ORGANIZER;
+            default:
+                return UserRole.USER;
+        }
     }
 
     private String generateVerificationToken(User user) {
@@ -132,7 +144,7 @@ public class AuthService {
 
         mailService.sendMail(new NotificationEmail("EventFinder password reset",
                 user.getEmail(), "Please click the link below to reset your password + " +
-                "http://localhost:8080/api/auth/resetPassword/" + passwordResetToken));
+                appConfig.getUrlBackend() + "/api/auth/resetPassword/" + passwordResetToken));
     }
 
 
@@ -185,8 +197,8 @@ public class AuthService {
 
     @Transactional
     public User getCurrentUser() throws UnauthorizedException {
-        try{
-            org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User)SecurityContextHolder
+        try {
+            org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder
                     .getContext().getAuthentication().getPrincipal();
 
             return userRepository.findByUsername(principal.getUsername()).get();
