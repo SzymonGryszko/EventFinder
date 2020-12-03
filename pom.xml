@@ -14,9 +14,9 @@
 	<name>eventFinder</name>
 	<description>Event Finder</description>
 
-	<properties>
-		<java.version>11</java.version>
-	</properties>
+<!--	<properties>-->
+<!--		<java.version>11</java.version>-->
+<!--	</properties>-->
 
 	<dependencies>
 		<dependency>
