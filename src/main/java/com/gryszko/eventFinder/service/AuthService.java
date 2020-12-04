@@ -61,7 +61,7 @@ public class AuthService {
         user.setCreated(Instant.now());
         user.setEnabled(true); //false with implemented mailing server
         switch (registerRequest.getAccountRole()) {
-            case "ORGANIZER_ROLE":
+            case "ROLE_ORGANIZER":
                 user.setUserRole(UserRole.ORGANIZER);
             default:
                 user.setUserRole(UserRole.USER);
