@@ -29,7 +29,6 @@ public class Event {
     private Date startingDate;
     private Date endDate;
     @NotBlank(message = "Description cannot be empty")
-    @Lob
     private String description;
     private String city;
     private String address;
