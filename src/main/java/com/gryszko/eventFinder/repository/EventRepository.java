@@ -15,8 +15,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findAllByStartingDateGreaterThanEqualOrderByStartingDateAsc(Date today);
     List<Event> findAllByCityContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(String city, Date today);
-    List<Event> findAllByDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(String keyDesc, String keyTitle, Date today);
-    List<Event> findAllByCityContainingAndDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(String city, String keyDesc, String keyTitle, Date today);
+    List<Event> findByDescriptionLikeOrTitleLikeAndStartingDateGreaterThanEqualOrderByStartingDateAsc(String description, String title, Date today);
+    List<Event> findByCityContainingAndDescriptionLikeOrTitleLikeAndStartingDateGreaterThanEqualOrderByStartingDateAsc(String city, String description, String title, Date today);
     List<Event> getAllByOrganizer(User user);
     List<Event> getAllByAttendeesContains(User user);
 

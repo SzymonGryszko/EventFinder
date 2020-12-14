@@ -59,12 +59,12 @@ public class EventService {
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
         } else if (Strings.isNullOrEmpty(city) && !Strings.isNullOrEmpty(keyWord)) {
-            return eventRepository.findAllByDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(keyWord, keyWord, today)
+            return eventRepository.findByDescriptionLikeOrTitleLikeAndStartingDateGreaterThanEqualOrderByStartingDateAsc(keyWord, keyWord, today)
                     .stream()
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
-  } else if (!Strings.isNullOrEmpty(city) && !Strings.isNullOrEmpty(keyWord)) {
-            return eventRepository.findAllByCityContainingAndDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(city, keyWord, keyWord, today)
+        } else if (!Strings.isNullOrEmpty(city) && !Strings.isNullOrEmpty(keyWord)) {
+            return eventRepository.findByCityContainingAndDescriptionLikeOrTitleLikeAndStartingDateGreaterThanEqualOrderByStartingDateAsc(city, keyWord, keyWord, today)
                     .stream()
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
@@ -125,7 +125,7 @@ public class EventService {
         }
 
         mailService.sendMail(new NotificationEmail(eventSignuporResignRequest.getUsername() + " signed up for your event - " + event.getTitle(),
-                organizer.getEmail(), "New person just signed up for your event, check it out"+ appConfig.getUrlFrontend() +"/events/" + eventSignuporResignRequest.getEventId()));
+                organizer.getEmail(), "New person just signed up for your event, check it out" + appConfig.getUrlFrontend() + "/events/" + eventSignuporResignRequest.getEventId()));
 
     }
 
@@ -138,7 +138,7 @@ public class EventService {
         Event updatedEvent = eventRepository.save(event);
 
         String emailTitle = "One of your events has just been updated!";
-        String emailBody = stringBuilder.build("Even you signed up for - ", event.getTitle(), " has just been updated, check it out "+ appConfig.getUrlFrontend() +"/events/", event.getEventId().toString());
+        String emailBody = stringBuilder.build("Even you signed up for - ", event.getTitle(), " has just been updated, check it out " + appConfig.getUrlFrontend() + "/events/", event.getEventId().toString());
 
         sendNotificationEmailToAllAttendees(attendees, emailTitle, emailBody);
         return eventMapper.mapEventEntityToEventResponse(updatedEvent);
@@ -179,7 +179,7 @@ public class EventService {
             eventRepository.save(event);
         }
         mailService.sendMail(new NotificationEmail(eventSignuporResignRequest.getUsername() + " resigned from your - " + event.getTitle(),
-                organizer.getEmail(), "One person just resigned from your event, check it out "+ appConfig.getUrlFrontend() +"/events/" + eventSignuporResignRequest.getEventId()));
+                organizer.getEmail(), "One person just resigned from your event, check it out " + appConfig.getUrlFrontend() + "/events/" + eventSignuporResignRequest.getEventId()));
 
     }
 }
