@@ -59,12 +59,12 @@ public class EventService {
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
         } else if (Strings.isNullOrEmpty(city) && !Strings.isNullOrEmpty(keyWord)) {
-            return eventRepository.searchByKeyword(keyWord, today)
+            return eventRepository.findAllByDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(keyWord, keyWord,today)
                     .stream()
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
         } else if (!Strings.isNullOrEmpty(city) && !Strings.isNullOrEmpty(keyWord)) {
-            return eventRepository.searchByCityAndKeyword(city, keyWord, today)
+            return eventRepository.findAllByCityLikeAndDescriptionContainingOrTitleContainingAndStartingDateGreaterThanEqualOrderByStartingDateAsc(city, keyWord, keyWord,today)
                     .stream()
                     .map(eventMapper::mapEventEntityToEventResponse)
                     .collect(Collectors.toList());
