@@ -63,8 +63,10 @@ public class AuthService {
         switch (registerRequest.getAccountRole()) {
             case "ROLE_ORGANIZER":
                 user.setUserRole(UserRole.ORGANIZER);
-            default:
+            case "ROLE_USER":
                 user.setUserRole(UserRole.USER);
+            default:
+                user.setUserRole(UserRole.ORGANIZER);
         }
         user.setEvents(new HashSet<>());
 
